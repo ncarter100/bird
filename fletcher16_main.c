@@ -2,6 +2,7 @@
  * Generate fletcher16 checksums
  */
 #include <arpa/inet.h>
+#include <assert.h>
 #include <stdio.h>
 
 #include "lib/fletcher16.h"
@@ -44,7 +45,8 @@ int main() {
     0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
     };
 
-    unsigned short checksum = checksum_gen(buf, 64, 0);
+    unsigned short checksum_host = checksum_gen(buf, 64, 0);
+    assert(checksum_host == 0x52c6);
 
     return 0;
 }
