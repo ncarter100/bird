@@ -8,6 +8,20 @@
 
 #include "lib/fletcher16.h"
 
+static void
+dump_buf(unsigned char *buf, int buf_len)
+{
+  int i;
+
+  printf("\nDump buf\n");
+  for (i = 0; i < buf_len; i++) {
+      printf(" 0x%2x,", buf[i]);
+      if ((i + 1) % 8 == 0) {
+          printf("\n ");
+      }
+  }
+}
+
 // Return existing checksum
 static unsigned short
 checksum_clear(unsigned char *buf, int checksum_offset)
@@ -21,9 +35,10 @@ checksum_clear(unsigned char *buf, int checksum_offset)
 }
 
 static void
-checksum_set(unsigned char *buf, int checksum_offset, unsigned short checksum)
+checksum_set(unsigned char *buf, int checksum_offset, unsigned short checksum_be)
 {
-  buf[checksum_offset] = checksum;
+  buf[checksum_offset] = checksum_be >> 8;
+  buf[checksum_offset + 1] = checksum_be & 0x00ff;
 }
 
 static unsigned short
@@ -74,12 +89,16 @@ int main() {
     0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
     };
 
+    dump_buf(buf, 64);
+
     int payload_len = 64;
     int checksum_offset = 0;
     unsigned short checksum_calc_be = checksum_gen(buf, payload_len, checksum_offset);
+    dump_buf(buf, 64);
     assert(checksum_calc_be == 0x52c6);
 
     checksum_set(buf, checksum_offset, checksum_calc_be);
+    dump_buf(buf, 64);
 
     assert(checksum_verify(buf, payload_len));
 
