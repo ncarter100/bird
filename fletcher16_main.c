@@ -13,11 +13,11 @@ dump_buf(unsigned char *buf, int buf_len)
 {
   int i;
 
-  printf("\nDump buf\n");
+  printf("\nDump buf %i bytes\n", buf_len);
   for (i = 0; i < buf_len; i++) {
       printf(" 0x%2x,", buf[i]);
       if ((i + 1) % 8 == 0) {
-          printf("\n ");
+          printf("\n");
       }
   }
 }
@@ -76,9 +76,10 @@ checksum_verify(unsigned char *buf, int payload_len) {
   return fletcher16_compute(&ctx) == 0;
 }
 
+#define BUF_LEN 64
 int main() {
 
-    unsigned char buf [64] = {
+    unsigned char buf [BUF_LEN] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
@@ -89,16 +90,16 @@ int main() {
     0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
     };
 
-    dump_buf(buf, 64);
+    dump_buf(buf, BUF_LEN);
 
     int payload_len = 64;
     int checksum_offset = 0;
     unsigned short checksum_calc_be = checksum_gen(buf, payload_len, checksum_offset);
-    dump_buf(buf, 64);
+    dump_buf(buf, payload_len);
     assert(checksum_calc_be == 0x52c6);
 
     checksum_set(buf, checksum_offset, checksum_calc_be);
-    dump_buf(buf, 64);
+    dump_buf(buf, payload_len);
 
     assert(checksum_verify(buf, payload_len));
 
