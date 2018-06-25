@@ -8,8 +8,6 @@
 static unsigned short
 checksum_gen(unsigned char *buf, int payload_len, int checksum_offset)
 {
-  unsigned short checksum = 0;
-
   // Zero checksum field
   buf[checksum_offset]= 0;
   buf[checksum_offset + 1] = 0;
@@ -20,14 +18,15 @@ checksum_gen(unsigned char *buf, int payload_len, int checksum_offset)
   fletcher16_init(&ctx);
 
   // Process Data
-  // fletcher_16_update()
   fletcher16_update(&ctx, buf, payload_len);
+  // fletcher16_update_n32, don't need this, its hton convertion
+  //                        packet crate does this for us
   //
   // Compute checksum value
-  // feltcher_16_final()
+  unsigned short checksum_be = fletcher16_final(&ctx, payload_len, checksum_offset);
 
-  printf("Generated Checksum %u\n", checksum);
-  return checksum;
+  printf("Generated Checksum BE 0x%x\n", checksum_be);
+  return checksum_be;
 }
 
 int main() {
