@@ -3,18 +3,34 @@
  */
 #include <arpa/inet.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "lib/fletcher16.h"
 
+// Return existing checksum
+static unsigned short
+checksum_clear(unsigned char *buf, int checksum_offset)
+{
+  unsigned short checksum_old = buf[checksum_offset] << 8 | buf[checksum_offset + 1];
+  // Zero checksum field
+  buf[checksum_offset] = 0;
+  buf[checksum_offset + 1] = 0;
+
+  return checksum_old;
+}
+
+static void
+checksum_set(unsigned char *buf, int checksum_offset, unsigned short checksum)
+{
+  buf[checksum_offset] = checksum;
+}
+
 static unsigned short
 checksum_gen(unsigned char *buf, int payload_len, int checksum_offset)
 {
-  // Zero checksum field
-  buf[checksum_offset]= 0;
-  buf[checksum_offset + 1] = 0;
+  checksum_clear(buf, checksum_offset);
 
-  //
   // Initialise context
   struct fletcher16_context ctx;
   fletcher16_init(&ctx);
@@ -23,13 +39,26 @@ checksum_gen(unsigned char *buf, int payload_len, int checksum_offset)
   fletcher16_update(&ctx, buf, payload_len);
   // fletcher16_update_n32, don't need this, its hton convertion
   //                        packet crate does this for us
-  //
+
   // Compute checksum value
-  unsigned short checksum_be = fletcher16_final(&ctx, payload_len, checksum_offset);
-  unsigned short checksum_host = ntohs(checksum_be);
+  unsigned short checksum_host = fletcher16_final(&ctx, payload_len, checksum_offset);
+  unsigned short checksum_be = htons(checksum_host);
+
 
   printf("Generated Checksum BE 0x%x Host 0x%x\n ", checksum_be, checksum_host);
-  return checksum_host;
+  return checksum_be;
+}
+
+static bool
+checksum_verify(unsigned char *buf, int payload_len) {
+  // Initialise context
+  struct fletcher16_context ctx;
+  fletcher16_init(&ctx);
+
+  // Process Data
+  fletcher16_update(&ctx, buf, payload_len);
+
+  return fletcher16_compute(&ctx) == 0;
 }
 
 int main() {
@@ -45,8 +74,14 @@ int main() {
     0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
     };
 
-    unsigned short checksum_host = checksum_gen(buf, 64, 0);
-    assert(checksum_host == 0x52c6);
+    int payload_len = 64;
+    int checksum_offset = 0;
+    unsigned short checksum_calc_be = checksum_gen(buf, payload_len, checksum_offset);
+    assert(checksum_calc_be == 0x52c6);
+
+    checksum_set(buf, checksum_offset, checksum_calc_be);
+
+    assert(checksum_verify(buf, payload_len));
 
     return 0;
 }
