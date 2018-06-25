@@ -6,19 +6,22 @@
 #include "lib/fletcher16.h"
 
 static unsigned short
-checksum_gen(unsigned char *buf, int checksum_offset)
+checksum_gen(unsigned char *buf, int payload_len, int checksum_offset)
 {
   unsigned short checksum = 0;
+
   // Zero checksum field
   buf[checksum_offset]= 0;
   buf[checksum_offset + 1] = 0;
 
   //
   // Initialise context
-  // fletcher_16_init()
-  //
+  struct fletcher16_context ctx;
+  fletcher16_init(&ctx);
+
   // Process Data
   // fletcher_16_update()
+  fletcher16_update(&ctx, buf, payload_len);
   //
   // Compute checksum value
   // feltcher_16_final()
@@ -40,7 +43,7 @@ int main() {
     0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
     };
 
-    unsigned short checksum = checksum_gen(buf, 0);
+    unsigned short checksum = checksum_gen(buf, 64, 0);
 
     return 0;
 }
