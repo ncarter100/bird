@@ -35,10 +35,10 @@ checksum_clear(unsigned char *buf, int checksum_offset)
 }
 
 static void
-checksum_set(unsigned char *buf, int checksum_offset, unsigned short checksum_be)
+checksum_be_set(unsigned char *buf, int checksum_offset, unsigned short checksum_be)
 {
-  buf[checksum_offset] = checksum_be >> 8;
-  buf[checksum_offset + 1] = checksum_be & 0x00ff;
+  buf[checksum_offset] = checksum_be & 0x00ff;
+  buf[checksum_offset + 1] = checksum_be >> 8;
 }
 
 static unsigned short
@@ -98,7 +98,7 @@ int main() {
     dump_buf(buf, payload_len);
     assert(checksum_calc_be == 0x52c6);
 
-    checksum_set(buf, checksum_offset, checksum_calc_be);
+    checksum_be_set(buf, checksum_offset, checksum_calc_be);
     dump_buf(buf, payload_len);
 
     assert(checksum_verify(buf, payload_len));
