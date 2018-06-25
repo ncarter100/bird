@@ -1,6 +1,7 @@
 /*
  * Generate fletcher16 checksums
  */
+#include <arpa/inet.h>
 #include <stdio.h>
 
 #include "lib/fletcher16.h"
@@ -24,9 +25,10 @@ checksum_gen(unsigned char *buf, int payload_len, int checksum_offset)
   //
   // Compute checksum value
   unsigned short checksum_be = fletcher16_final(&ctx, payload_len, checksum_offset);
+  unsigned short checksum_host = ntohs(checksum_be);
 
-  printf("Generated Checksum BE 0x%x\n", checksum_be);
-  return checksum_be;
+  printf("Generated Checksum BE 0x%x Host 0x%x\n ", checksum_be, checksum_host);
+  return checksum_host;
 }
 
 int main() {
