@@ -26,7 +26,32 @@
 #ifndef _BIRD_FLETCHER16_H_
 #define _BIRD_FLETCHER16_H_
 
-#include "nest/bird.h"
+//#include "nest/bird.h"
+
+/* Types */
+
+#include <stdint.h>
+typedef int8_t s8;
+typedef uint8_t u8;
+typedef int16_t s16;
+typedef uint16_t u16;
+typedef int32_t s32;
+typedef uint32_t u32;
+typedef int64_t s64;
+typedef uint64_t u64;
+typedef uint8_t byte;
+typedef uint16_t word;
+typedef unsigned int uint;
+
+#define MIN_(a,b) (((a)<(b))?(a):(b))
+#define MAX_(a,b) (((a)>(b))?(a):(b))
+
+#ifndef PARSER
+#undef MIN
+#undef MAX
+#define MIN(a,b) MIN_(a,b)
+#define MAX(a,b) MAX_(a,b)
+#endif
 
 
 struct fletcher16_context
