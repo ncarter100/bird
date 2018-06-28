@@ -614,7 +614,7 @@ int main() {
  0x85, 0x0c, 0xfd, 0xe3, 0x9a, 0x6a, 0x5b, 0x71, // byte offsets 4152->4159
     };
 
-    dump_buf(buf, BUF_LEN);
+    //dump_buf(buf, BUF_LEN);
 
     int payload_len = 4160;
     int checksum_offset = 0;

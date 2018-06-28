@@ -98,6 +98,7 @@ fletcher16_update(struct fletcher16_context *ctx, const u8* buf, int len)
   int blen, i;
 
   blen = len % 4;
+  printf("blen remainder %d\n", blen);
   len -= blen;
 
   for (i = 0; i < blen; i++)
@@ -105,6 +106,7 @@ fletcher16_update(struct fletcher16_context *ctx, const u8* buf, int len)
 
   do {
     blen = MIN(len, MODX);
+    printf("blen loop %d\n", blen);
     len -= blen;
 
     for (i = 0; i < blen; i += 4)
@@ -117,6 +119,8 @@ fletcher16_update(struct fletcher16_context *ctx, const u8* buf, int len)
 
     ctx->c0 %= 255;
     ctx->c1 %= 255;
+
+    printf("c0 %d, c1 %d\n", ctx->c0, ctx->c1);
 
   } while (len);
 }
